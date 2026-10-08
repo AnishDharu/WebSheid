@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+
+{% block title %}New Scan — Web Shield{% endblock %}
+
+{% block content %}
+<div class="page-layout" style="position: relative; z-index: 1;">
+  <aside class="sidebar">
+    <div class="sidebar-title">Navigation</div>
+    <a href="{% url 'dashboard' %}" class="sidebar-link" id="sidebar-dashboard">
+      <span class="sidebar-icon">📊</span> Dashboard
+    </a>
+    <a href="{% url 'new_scan' %}" class="sidebar-link active" id="sidebar-new-scan">
+      <span class="sidebar-icon">🔍</span> New Scan
+    </a>
+    <a href="{% url 'scan_history' %}" class="sidebar-link" id="sidebar-history">
+      <span class="sidebar-icon">📋</span> Scan History
+    </a>
+    {% if user.is_staff %}
+    <div class="sidebar-title">Administration</div>
+    <a href="{% url 'admin_panel' %}" class="sidebar-link" id="sidebar-admin">
+      <span class="sidebar-icon">⚙️</span> Admin Panel
+    </a>
+    {% endif %}
+  </aside>
+
+  <main class="main-content">
+    <div class="page-header">
+      <h1>🔍 New Vulnerability Scan</h1>
+      <p>Enter a target URL to begin a comprehensive security assessment.</p>
+    </div>
+
+    <div class="row g-4">
+      <!-- SCAN FORM -->
+      <div class="col-lg-7">
+        <div class="card">
+          <div class="card-header"><i class="bi bi-search me-2"></i>Scan Configuration</div>
+          <div class="card-body">
+            <form method="post" id="scan-form">
+              {% csrf_token %}
+              <div class="form-group">
+                <label class="form-label" for="id_target_url">Target Website URL</label>
+                <input type="url" name="target_url" id="id_target_url" class="form-control"
+                       placeholder="https://example.com" required
+                       style="font-size: 1.05rem; padding: 14px 18px;">
+                <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 6px;">
+                  <i class="bi bi-info-circle"></i>
+                  Enter the full URL including https://
+                </div>
+              </div>
+
+              <div style="margin: 20px 0; padding: 14px 18px; background: rgba(255,107,53,0.07); border: 1px solid rgba(255,107,53,0.2); border-radius: var(--radius-md);">
+                <label class="form-check" style="display: flex; align-items: flex-start; gap: 12px; cursor: pointer; margin: 0;">
+                  <input type="checkbox" name="consent" id="id_consent" required
+                         style="width: 18px; height: 18px; margin-top: 2px; accent-color: var(--accent-blue); cursor: pointer; flex-shrink: 0;">
+                  <span style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.5;">
+                    <strong style="color: var(--accent-orange);">⚠️ Authorization Confirmation:</strong>
+                    I confirm that I own this website or have explicit written permission from its owner to perform security testing. Unauthorized scanning may be illegal.
+                  </span>
+                </label>
+              </div>
+
+              <button type="submit" class="btn btn-primary btn-lg w-100" id="scan-submit">
+                <i class="bi bi-search"></i> Launch Security Scan
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- WHAT WE SCAN -->
+      <div class="col-lg-5">
+        <div class="card">
+          <div class="card-header"><i class="bi bi-list-check me-2"></i>What We Scan</div>
+          <div class="card-body" style="padding: 0;">
+            {% for plugin_key, plugin_name, plugin_icon, plugin_desc in plugin_list %}
+            <div style="padding: 14px 20px; border-bottom: 1px solid var(--border-color); display: flex; gap: 12px; align-items: flex-start;">
+              <span style="font-size: 1.3rem; flex-shrink: 0;">{{ plugin_icon }}</span>
+              <div>
+                <div style="font-weight: 600; font-size: 0.9rem; margin-bottom: 2px;">{{ plugin_name }}</div>
+                <div style="font-size: 0.8rem; color: var(--text-muted);">{{ plugin_desc }}</div>
+              </div>
+            </div>
+            {% empty %}
+            {% for icon, name, desc in default_plugins %}
+            <div style="padding: 14px 20px; border-bottom: 1px solid var(--border-color); display: flex; gap: 12px; align-items: flex-start;">
+              <span style="font-size: 1.3rem; flex-shrink: 0;">{{ icon }}</span>
+              <div>
+                <div style="font-weight: 600; font-size: 0.9rem; margin-bottom: 2px;">{{ name }}</div>
+                <div style="font-size: 0.8rem; color: var(--text-muted);">{{ desc }}</div>
+              </div>
+            </div>
+            {% endfor %}
+            <div style="padding: 14px 20px; border-bottom: 1px solid var(--border-color); display: flex; gap: 12px; align-items: flex-start;">
+              <span style="font-size: 1.3rem; flex-shrink: 0;">🔒</span>
+              <div><div style="font-weight: 600; font-size: 0.9rem; margin-bottom: 2px;">HTTP Security Headers</div><div style="font-size: 0.8rem; color: var(--text-muted);">HSTS, CSP, X-Frame-Options, etc.</div></div>
+            </div>
+            <div style="padding: 14px 20px; border-bottom: 1px solid var(--border-color); display: flex; gap: 12px; align-items: flex-start;">
+              <span style="font-size: 1.3rem; flex-shrink: 0;">🔐</span>
+              <div><div style="font-weight: 600; font-size: 0.9rem; margin-bottom: 2px;">SSL/TLS Certificate</div><div style="font-size: 0.8rem; color: var(--text-muted);">Validity, expiry, protocol version</div></div>
+            </div>
+            <div style="padding: 14px 20px; border-bottom: 1px solid var(--border-color); display: flex; gap: 12px; align-items: flex-start;">
+              <span style="font-size: 1.3rem; flex-shrink: 0;">🌐</span>
+              <div><div style="font-weight: 600; font-size: 0.9rem; margin-bottom: 2px;">DNS & IP Analysis</div><div style="font-size: 0.8rem; color: var(--text-muted);">SPF, DMARC, MX records</div></div>
+            </div>
+            <div style="padding: 14px 20px; border-bottom: 1px solid var(--border-color); display: flex; gap: 12px; align-items: flex-start;">
+              <span style="font-size: 1.3rem; flex-shrink: 0;">🚪</span>
+              <div><div style="font-weight: 600; font-size: 0.9rem; margin-bottom: 2px;">Open Ports</div><div style="font-size: 0.8rem; color: var(--text-muted);">Database, RDP, Telnet, VNC, etc.</div></div>
+            </div>
+            <div style="padding: 14px 20px; border-bottom: 1px solid var(--border-color); display: flex; gap: 12px; align-items: flex-start;">
+              <span style="font-size: 1.3rem; flex-shrink: 0;">🍪</span>
+              <div><div style="font-weight: 600; font-size: 0.9rem; margin-bottom: 2px;">Cookie Security</div><div style="font-size: 0.8rem; color: var(--text-muted);">Secure, HttpOnly, SameSite flags</div></div>
+            </div>
+            <div style="padding: 14px 20px; border-bottom: 1px solid var(--border-color); display: flex; gap: 12px; align-items: flex-start;">
+              <span style="font-size: 1.3rem; flex-shrink: 0;">💉</span>
+              <div><div style="font-weight: 600; font-size: 0.9rem; margin-bottom: 2px;">XSS / SQLi / CSRF</div><div style="font-size: 0.8rem; color: var(--text-muted);">Passive detection of injection risks</div></div>
+            </div>
+            <div style="padding: 14px 20px; display: flex; gap: 12px; align-items: flex-start;">
+              <span style="font-size: 1.3rem; flex-shrink: 0;">🔍</span>
+              <div><div style="font-weight: 600; font-size: 0.9rem; margin-bottom: 2px;">Subdomains & Directories</div><div style="font-size: 0.8rem; color: var(--text-muted);">Exposed admin panels and configs</div></div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- ML Badge -->
+        <div style="margin-top: 16px; padding: 16px 20px; background: rgba(191,90,242,0.08); border: 1px solid rgba(191,90,242,0.2); border-radius: var(--radius-md); display: flex; gap: 14px; align-items: center;">
+          <div style="font-size: 2rem;">🤖</div>
+          <div>
+            <div style="font-weight: 700; font-size: 0.9rem; color: var(--accent-purple); margin-bottom: 4px;">ML Risk Classification</div>
+            <div style="font-size: 0.8rem; color: var(--text-muted);">Results are analyzed by a Logistic Regression model to determine your overall risk level: Low / Medium / High / Critical.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+{% endblock %}

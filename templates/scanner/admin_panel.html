@@ -1,0 +1,199 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Panel — Web Shield{% endblock %}
+
+{% block content %}
+<div class="page-layout" style="position: relative; z-index: 1;">
+  <aside class="sidebar">
+    <div class="sidebar-title">Navigation</div>
+    <a href="{% url 'dashboard' %}" class="sidebar-link" id="sidebar-dashboard"><span class="sidebar-icon">📊</span> Dashboard</a>
+    <a href="{% url 'new_scan' %}" class="sidebar-link" id="sidebar-new-scan"><span class="sidebar-icon">🔍</span> New Scan</a>
+    <div class="sidebar-title">Administration</div>
+    <a href="{% url 'admin_panel' %}" class="sidebar-link active" id="sidebar-admin-panel"><span class="sidebar-icon">⚙️</span> Admin Panel</a>
+    <a href="/admin/" class="sidebar-link" id="sidebar-django-admin"><span class="sidebar-icon">🔧</span> Django Admin</a>
+  </aside>
+
+  <main class="main-content">
+    <div class="page-header">
+      <h1>⚙️ Admin Panel</h1>
+      <p>Manage users, scans, and scanner plugins.</p>
+    </div>
+
+    <!-- STATS -->
+    <div class="row g-4 mb-4">
+      <div class="col-md-3">
+        <div class="stat-card" id="admin-stat-users">
+          <div class="stat-icon">👥</div>
+          <div class="stat-value">{{ total_users }}</div>
+          <div class="stat-label">Total Users</div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="stat-card" id="admin-stat-scans">
+          <div class="stat-icon">🔍</div>
+          <div class="stat-value">{{ total_scans }}</div>
+          <div class="stat-label">Total Scans</div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="stat-card" id="admin-stat-completed">
+          <div class="stat-icon">✅</div>
+          <div class="stat-value">{{ completed_scans }}</div>
+          <div class="stat-label">Completed</div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="stat-card" id="admin-stat-failed">
+          <div class="stat-icon" style="color: var(--accent-red);">❌</div>
+          <div class="stat-value" style="background: linear-gradient(135deg, #FF2D55, #FF6B35); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">{{ failed_scans }}</div>
+          <div class="stat-label">Failed</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row g-4">
+      <!-- PLUGINS MANAGEMENT -->
+      <div class="col-lg-6">
+        <div class="card">
+          <div class="card-header" style="display: flex; align-items: center; justify-content: space-between;">
+            <span><i class="bi bi-plug me-2"></i>Scanner Plugins</span>
+            <form method="post" action="{% url 'train_ml_model' %}" style="margin: 0;">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-sm" id="btn-train-ml"
+                      style="background: rgba(191,90,242,0.15); color: #BF5AF2; border: 1px solid rgba(191,90,242,0.3);">
+                <i class="bi bi-cpu"></i> Train ML Model
+              </button>
+            </form>
+          </div>
+          <div class="card-body" style="padding: 0;">
+            {% for plugin in plugins %}
+            <div style="padding: 14px 20px; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; gap: 12px;">
+              <div style="flex: 1;">
+                <div style="font-weight: 600; font-size: 0.9rem; margin-bottom: 2px;">{{ plugin.display_name }}</div>
+                <div style="font-size: 0.8rem; color: var(--text-muted);">{{ plugin.description|truncatechars:60 }}</div>
+                <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 3px;" class="mono">v{{ plugin.version }}</div>
+              </div>
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="font-size: 0.8rem; font-weight: 600;
+                  color: {% if plugin.is_enabled %}#30D158{% else %}#636366{% endif %};">
+                  {% if plugin.is_enabled %}● Active{% else %}○ Disabled{% endif %}
+                </span>
+                <a href="{% url 'toggle_plugin' plugin.id %}" class="btn btn-sm btn-outline" id="toggle-{{ plugin.id }}">
+                  {% if plugin.is_enabled %}Disable{% else %}Enable{% endif %}
+                </a>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+
+      <!-- RECENT SCANS -->
+      <div class="col-lg-6">
+        <div class="card">
+          <div class="card-header"><i class="bi bi-clock-history me-2"></i>Recent Scans (All Users)</div>
+          <div class="card-body" style="padding: 0;">
+            <table class="table" id="admin-scans-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>User</th>
+                  <th>URL</th>
+                  <th>Status</th>
+                  <th>Score</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for scan in recent_scans %}
+                <tr>
+                  <td class="mono" style="font-size: 0.8rem; color: var(--text-muted);">{{ scan.id }}</td>
+                  <td style="font-size: 0.85rem;">{{ scan.user.username }}</td>
+                  <td>
+                    <span style="font-size: 0.8rem; color: var(--text-muted); font-family: 'JetBrains Mono', monospace;">
+                      {{ scan.target_url|truncatechars:30 }}
+                    </span>
+                  </td>
+                  <td>
+                    <span class="status-dot {{ scan.status }}"></span>
+                    <span style="font-size: 0.8rem; color: var(--text-secondary);">{{ scan.get_status_display }}</span>
+                  </td>
+                  <td>
+                    {% if scan.security_score is not None %}
+                    <span style="font-weight: 700; font-size: 0.85rem;
+                      color: {% if scan.security_score >= 70 %}#30D158{% elif scan.security_score >= 40 %}#FFD60A{% else %}#FF2D55{% endif %};">
+                      {{ scan.security_score }}
+                    </span>
+                    {% else %}<span style="color: var(--text-muted); font-size: 0.8rem;">—</span>{% endif %}
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- USERS TABLE -->
+    <div class="card" style="margin-top: 24px;">
+      <div class="card-header"><i class="bi bi-people me-2"></i>User Management</div>
+      <div class="card-body" style="padding: 0;">
+        <table class="table" id="admin-users-table">
+          <thead>
+            <tr>
+              <th>User</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Scans</th>
+              <th>Joined</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for u in all_users %}
+            <tr>
+              <td>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <div style="width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #0A84FF, #BF5AF2); display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; color: white; flex-shrink: 0;">
+                    {{ u.first_name|first|upper|default:u.username|first|upper }}
+                  </div>
+                  <div>
+                    <div style="font-weight: 600; font-size: 0.9rem;">{{ u.get_full_name|default:u.username }}</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted);" class="mono">@{{ u.username }}</div>
+                  </div>
+                </div>
+              </td>
+              <td style="font-size: 0.85rem; color: var(--text-secondary);">{{ u.email }}</td>
+              <td>
+                {% if u.is_superuser %}
+                <span class="badge-severity badge-critical">Superuser</span>
+                {% elif u.is_staff %}
+                <span class="badge-severity badge-medium">Admin</span>
+                {% else %}
+                <span class="badge-severity badge-info">User</span>
+                {% endif %}
+              </td>
+              <td style="font-size: 0.85rem; color: var(--text-muted);">{{ u.scans.count }}</td>
+              <td style="font-size: 0.8rem; color: var(--text-muted);">{{ u.date_joined|date:"M d, Y" }}</td>
+              <td>
+                {% if not u.is_superuser and u != request.user %}
+                <form method="post" action="{% url 'admin_delete_user' u.id %}" style="margin: 0;"
+                      onsubmit="return confirm('Delete user {{ u.username }}? This will delete all their scans too.')">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-sm btn-danger" id="delete-user-{{ u.id }}">
+                    <i class="bi bi-trash3"></i> Delete
+                  </button>
+                </form>
+                {% else %}
+                <span style="font-size: 0.8rem; color: var(--text-muted);">Protected</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</div>
+{% endblock %}

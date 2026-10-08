@@ -1,0 +1,205 @@
+{% extends 'base.html' %}
+
+{% block title %}Web Shield — Protect Your Web Applications{% endblock %}
+
+{% block content %}
+<!-- HERO SECTION -->
+<section class="hero" style="position: relative; z-index: 1;">
+  <div class="hero-glow"></div>
+  <div class="container">
+    <div class="row align-items-center">
+      <div class="col-lg-6">
+        <div style="margin-bottom: 20px;">
+          <span class="feature-pill" style="background: rgba(10,132,255,0.1); border-color: rgba(10,132,255,0.3); color: var(--accent-blue);">
+            <i class="bi bi-shield-check"></i> Security Research Tool
+          </span>
+        </div>
+        <h1 class="hero-title" id="hero-title">
+          Scan. Detect.<br>
+          <span class="hero-gradient-text">Protect.</span>
+        </h1>
+        <p class="hero-subtitle" id="hero-subtitle">
+          Web Shield automates vulnerability assessment of web applications — scanning for
+          security headers, SSL flaws, open ports, XSS, SQLi, CSRF, and more. Get a
+          comprehensive security score powered by Machine Learning.
+        </p>
+        <div style="display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 40px;">
+          <a href="{% url 'register' %}" class="btn btn-primary btn-lg" id="hero-cta-register">
+            <i class="bi bi-shield-plus"></i> Start Free Scan
+          </a>
+          <a href="{% url 'login' %}" class="btn btn-outline btn-lg" id="hero-cta-login">
+            <i class="bi bi-box-arrow-in-right"></i> Login
+          </a>
+        </div>
+        <!-- Feature Pills -->
+        <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+          <span class="feature-pill"><i class="bi bi-shield"></i> 10 Security Plugins</span>
+          <span class="feature-pill"><i class="bi bi-cpu"></i> ML Risk Classifier</span>
+          <span class="feature-pill"><i class="bi bi-file-pdf"></i> PDF Reports</span>
+          <span class="feature-pill"><i class="bi bi-clock-history"></i> Scan History</span>
+          <span class="feature-pill"><i class="bi bi-graph-up"></i> Security Score</span>
+        </div>
+      </div>
+
+      <div class="col-lg-6 d-none d-lg-flex justify-content-center">
+        <!-- Animated Scanner Illustration -->
+        <div style="position: relative; width: 420px; height: 420px;">
+          <!-- Outer rings -->
+          <div style="position: absolute; inset: 0; border-radius: 50%; border: 1px solid rgba(10,132,255,0.1); animation: spin-slow 20s linear infinite;"></div>
+          <div style="position: absolute; inset: 20px; border-radius: 50%; border: 1px solid rgba(191,90,242,0.1); animation: spin-slow 15s linear infinite reverse;"></div>
+          <div style="position: absolute; inset: 40px; border-radius: 50%; border: 1px dashed rgba(10,132,255,0.15); animation: spin-slow 10s linear infinite;"></div>
+
+          <!-- Center card -->
+          <div style="position: absolute; inset: 60px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-xl); padding: 30px; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 0 60px rgba(10,132,255,0.1);">
+            <div style="font-size: 3rem; margin-bottom: 12px;">🛡️</div>
+            <div style="font-size: 1rem; font-weight: 700; color: var(--text-primary); margin-bottom: 4px;">Web Shield</div>
+            <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 20px;">Vulnerability Scanner</div>
+
+            <!-- Mini scan result display -->
+            <div style="width: 100%; display: flex; flex-direction: column; gap: 6px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,45,85,0.1); border-radius: 6px; padding: 6px 10px;">
+                <span style="font-size: 0.7rem; color: var(--text-secondary);">Missing HSTS</span>
+                <span style="font-size: 0.65rem; color: #FF2D55; font-weight: 700;">HIGH</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,214,10,0.1); border-radius: 6px; padding: 6px 10px;">
+                <span style="font-size: 0.7rem; color: var(--text-secondary);">Missing CSP</span>
+                <span style="font-size: 0.65rem; color: #FFD60A; font-weight: 700;">MEDIUM</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(48,209,88,0.1); border-radius: 6px; padding: 6px 10px;">
+                <span style="font-size: 0.7rem; color: var(--text-secondary);">SSL Valid ✓</span>
+                <span style="font-size: 0.65rem; color: #30D158; font-weight: 700;">GOOD</span>
+              </div>
+            </div>
+
+            <!-- Score -->
+            <div style="margin-top: 16px; text-align: center;">
+              <div style="font-size: 2rem; font-weight: 800; color: var(--accent-yellow);">67</div>
+              <div style="font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Security Score</div>
+            </div>
+          </div>
+
+          <!-- Orbiting dots -->
+          <div class="orbit-dot" style="position: absolute; width: 10px; height: 10px; background: var(--accent-blue); border-radius: 50%; top: 10px; left: 50%; animation: orbit 4s linear infinite; box-shadow: 0 0 10px var(--accent-blue);"></div>
+          <div class="orbit-dot" style="position: absolute; width: 8px; height: 8px; background: var(--accent-purple); border-radius: 50%; bottom: 30px; right: 20px; animation: orbit 6s linear infinite reverse; box-shadow: 0 0 8px var(--accent-purple);"></div>
+          <div class="orbit-dot" style="position: absolute; width: 6px; height: 6px; background: var(--accent-green); border-radius: 50%; top: 50%; left: 5px; animation: orbit 3s linear infinite; box-shadow: 0 0 6px var(--accent-green);"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES SECTION -->
+<section style="padding: 80px 0; position: relative; z-index: 1;">
+  <div class="container">
+    <div style="text-align: center; margin-bottom: 60px;">
+      <h2 style="font-size: 2.5rem; font-weight: 800; letter-spacing: -1px; margin-bottom: 12px;">
+        Comprehensive <span class="text-gradient">Security Coverage</span>
+      </h2>
+      <p style="color: var(--text-secondary); font-size: 1.1rem; max-width: 500px; margin: 0 auto;">
+        10 independent scanning modules working together to give you a complete picture of your website's security posture.
+      </p>
+    </div>
+
+    <div class="row g-4">
+      {% for plugin in plugins %}
+      <div class="col-md-6 col-lg-4">
+        <div class="card" style="height: 100%; padding: 24px;">
+          <div style="font-size: 1.8rem; margin-bottom: 12px;">
+            {% if plugin.name == 'headers' %}🔒
+            {% elif plugin.name == 'ssl' %}🔐
+            {% elif plugin.name == 'dns' %}🌐
+            {% elif plugin.name == 'ports' %}🚪
+            {% elif plugin.name == 'xss' %}💉
+            {% elif plugin.name == 'sqli' %}🗄️
+            {% elif plugin.name == 'csrf' %}🎭
+            {% elif plugin.name == 'cookies' %}🍪
+            {% elif plugin.name == 'subdomains' %}🔍
+            {% else %}📡{% endif %}
+          </div>
+          <h3 style="font-size: 1rem; font-weight: 700; margin-bottom: 8px;">{{ plugin.display_name }}</h3>
+          <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5;">{{ plugin.description }}</p>
+        </div>
+      </div>
+      {% empty %}
+      {% for name, icon, title, desc in feature_list %}
+      <div class="col-md-6 col-lg-4">
+        <div class="card" style="height: 100%; padding: 24px;">
+          <div style="font-size: 1.8rem; margin-bottom: 12px;">{{ icon }}</div>
+          <h3 style="font-size: 1rem; font-weight: 700; margin-bottom: 8px;">{{ title }}</h3>
+          <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5;">{{ desc }}</p>
+        </div>
+      </div>
+      {% endfor %}
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section style="padding: 80px 0; background: rgba(255,255,255,0.01); position: relative; z-index: 1;">
+  <div class="container">
+    <div style="text-align: center; margin-bottom: 60px;">
+      <h2 style="font-size: 2.5rem; font-weight: 800; letter-spacing: -1px; margin-bottom: 12px;">
+        How It <span class="text-gradient">Works</span>
+      </h2>
+    </div>
+    <div class="row g-4 justify-content-center">
+      {% for step_num, step_icon, step_title, step_desc in steps %}
+      <div class="col-md-3 text-center">
+        <div style="width: 60px; height: 60px; border-radius: 50%; background: var(--accent-blue-dim); border: 1px solid rgba(10,132,255,0.3); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin: 0 auto 16px;">{{ step_icon }}</div>
+        <div style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--accent-blue); margin-bottom: 6px;">Step {{ step_num }}</div>
+        <h3 style="font-size: 1rem; font-weight: 700; margin-bottom: 8px;">{{ step_title }}</h3>
+        <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5;">{{ step_desc }}</p>
+      </div>
+      {% empty %}
+      <div class="col-md-3 text-center">
+        <div style="width: 60px; height: 60px; border-radius: 50%; background: var(--accent-blue-dim); border: 1px solid rgba(10,132,255,0.3); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin: 0 auto 16px;">👤</div>
+        <div style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--accent-blue); margin-bottom: 6px;">Step 1</div>
+        <h3 style="font-size: 1rem; font-weight: 700; margin-bottom: 8px;">Register</h3>
+        <p style="font-size: 0.85rem; color: var(--text-muted);">Create your free account to get started.</p>
+      </div>
+      <div class="col-md-3 text-center">
+        <div style="width: 60px; height: 60px; border-radius: 50%; background: var(--accent-blue-dim); border: 1px solid rgba(10,132,255,0.3); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin: 0 auto 16px;">🔗</div>
+        <div style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--accent-blue); margin-bottom: 6px;">Step 2</div>
+        <h3 style="font-size: 1rem; font-weight: 700; margin-bottom: 8px;">Submit URL</h3>
+        <p style="font-size: 0.85rem; color: var(--text-muted);">Enter the URL of your authorized website.</p>
+      </div>
+      <div class="col-md-3 text-center">
+        <div style="width: 60px; height: 60px; border-radius: 50%; background: var(--accent-blue-dim); border: 1px solid rgba(10,132,255,0.3); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin: 0 auto 16px;">⚡</div>
+        <div style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--accent-blue); margin-bottom: 6px;">Step 3</div>
+        <h3 style="font-size: 1rem; font-weight: 700; margin-bottom: 8px;">Auto Scan</h3>
+        <p style="font-size: 0.85rem; color: var(--text-muted);">10 plugins scan all security dimensions automatically.</p>
+      </div>
+      <div class="col-md-3 text-center">
+        <div style="width: 60px; height: 60px; border-radius: 50%; background: var(--accent-blue-dim); border: 1px solid rgba(10,132,255,0.3); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin: 0 auto 16px;">📊</div>
+        <div style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--accent-blue); margin-bottom: 6px;">Step 4</div>
+        <h3 style="font-size: 1rem; font-weight: 700; margin-bottom: 8px;">Get Report</h3>
+        <p style="font-size: 0.85rem; color: var(--text-muted);">Download a detailed PDF report with remediation steps.</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- CTA SECTION -->
+<section style="padding: 100px 0; position: relative; z-index: 1; text-align: center;">
+  <div class="container">
+    <div style="max-width: 600px; margin: 0 auto;">
+      <h2 style="font-size: 3rem; font-weight: 800; letter-spacing: -1px; margin-bottom: 16px;">
+        Is Your Website<br><span class="hero-gradient-text">Truly Secure?</span>
+      </h2>
+      <p style="color: var(--text-secondary); font-size: 1.1rem; margin-bottom: 36px;">
+        Find out in minutes. Web Shield gives you a clear picture of your security posture.
+      </p>
+      <a href="{% url 'register' %}" class="btn btn-primary btn-lg" id="cta-register">
+        <i class="bi bi-shield-plus"></i> Run Your First Scan Free
+      </a>
+    </div>
+  </div>
+</section>
+
+<style>
+@keyframes spin-slow { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes orbit { 0% { transform: rotate(0deg) translateX(200px) rotate(0deg); } 100% { transform: rotate(360deg) translateX(200px) rotate(-360deg); } }
+</style>
+{% endblock %}

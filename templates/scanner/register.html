@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Account — Web Shield{% endblock %}
+
+{% block content %}
+<div class="auth-container" style="padding: 40px 20px;">
+  <div class="auth-card" style="max-width: 540px;">
+    <div class="auth-logo">
+      <div style="font-size: 3rem; margin-bottom: 12px;">🛡️</div>
+      <h1 class="auth-title">Create Account</h1>
+      <p class="auth-subtitle">Join Web Shield and start securing your websites</p>
+    </div>
+
+    <form method="post" id="register-form">
+      {% csrf_token %}
+      <div class="row g-3">
+        <div class="col-6">
+          <label class="form-label" for="id_first_name">First Name</label>
+          <input type="text" name="first_name" id="id_first_name" class="form-control"
+                 placeholder="First name" required value="{{ form.first_name.value|default:'' }}">
+          {% if form.first_name.errors %}
+          <div style="color: var(--accent-red); font-size: 0.8rem; margin-top: 4px;">{{ form.first_name.errors.0 }}</div>
+          {% endif %}
+        </div>
+        <div class="col-6">
+          <label class="form-label" for="id_last_name">Last Name</label>
+          <input type="text" name="last_name" id="id_last_name" class="form-control"
+                 placeholder="Last name" required value="{{ form.last_name.value|default:'' }}">
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-top: 16px;">
+        <label class="form-label" for="id_email">Email Address</label>
+        <input type="email" name="email" id="id_email" class="form-control"
+               placeholder="you@example.com" required value="{{ form.email.value|default:'' }}">
+        {% if form.email.errors %}
+        <div style="color: var(--accent-red); font-size: 0.8rem; margin-top: 4px;">{{ form.email.errors.0 }}</div>
+        {% endif %}
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="id_username">Username</label>
+        <input type="text" name="username" id="id_username" class="form-control"
+               placeholder="Choose a username" required value="{{ form.username.value|default:'' }}">
+        {% if form.username.errors %}
+        <div style="color: var(--accent-red); font-size: 0.8rem; margin-top: 4px;">{{ form.username.errors.0 }}</div>
+        {% endif %}
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="id_organization">Organization <span style="color: var(--text-muted); font-weight: 400;">(Optional)</span></label>
+        <input type="text" name="organization" id="id_organization" class="form-control"
+               placeholder="Your company or university" value="{{ form.organization.value|default:'' }}">
+      </div>
+
+      <div class="row g-3">
+        <div class="col-6">
+          <label class="form-label" for="id_password1">Password</label>
+          <div style="position: relative;">
+            <input type="password" name="password1" id="id_password1" class="form-control"
+                   placeholder="Password" required>
+            <button type="button" onclick="togglePassword('id_password1', this)"
+              style="position: absolute; right: 14px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-muted); cursor: pointer;">
+              <i class="bi bi-eye"></i>
+            </button>
+          </div>
+          {% if form.password1.errors %}
+          <div style="color: var(--accent-red); font-size: 0.8rem; margin-top: 4px;">{{ form.password1.errors.0 }}</div>
+          {% endif %}
+        </div>
+        <div class="col-6">
+          <label class="form-label" for="id_password2">Confirm Password</label>
+          <div style="position: relative;">
+            <input type="password" name="password2" id="id_password2" class="form-control"
+                   placeholder="Confirm" required>
+          </div>
+          {% if form.password2.errors %}
+          <div style="color: var(--accent-red); font-size: 0.8rem; margin-top: 4px;">{{ form.password2.errors.0 }}</div>
+          {% endif %}
+        </div>
+      </div>
+
+      <div style="margin-top: 20px; padding: 14px; background: rgba(10,132,255,0.05); border: 1px solid rgba(10,132,255,0.2); border-radius: var(--radius-sm);">
+        <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0; line-height: 1.5;">
+          <i class="bi bi-info-circle" style="color: var(--accent-blue); margin-right: 6px;"></i>
+          <strong style="color: var(--text-secondary);">Responsible Use:</strong>
+          Web Shield is for authorized security testing only. You agree to scan only websites you own or have explicit permission to test.
+        </p>
+      </div>
+
+      <button type="submit" class="btn btn-primary w-100 btn-lg" id="register-submit" style="margin-top: 20px;">
+        <i class="bi bi-shield-plus"></i> Create Account
+      </button>
+    </form>
+
+    <div class="divider" style="margin: 24px 0;"></div>
+
+    <p style="text-align: center; color: var(--text-muted); font-size: 0.9rem;">
+      Already have an account?
+      <a href="{% url 'login' %}" style="color: var(--accent-blue); text-decoration: none; font-weight: 600;" id="link-login">
+        Sign in
+      </a>
+    </p>
+  </div>
+</div>
+
+<script>
+function togglePassword(inputId, btn) {
+  var input = document.getElementById(inputId);
+  if (input.type === 'password') {
+    input.type = 'text';
+    btn.innerHTML = '<i class="bi bi-eye-slash"></i>';
+  } else {
+    input.type = 'password';
+    btn.innerHTML = '<i class="bi bi-eye"></i>';
+  }
+}
+</script>
+{% endblock %}

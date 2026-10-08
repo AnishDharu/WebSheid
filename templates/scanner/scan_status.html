@@ -1,0 +1,161 @@
+{% extends 'base.html' %}
+
+{% block title %}Scan #{{ scan.id }} — Web Shield{% endblock %}
+
+{% block content %}
+<div style="min-height: 80vh; display: flex; align-items: center; justify-content: center; padding: 40px; position: relative; z-index: 1;">
+  <div style="max-width: 580px; width: 100%; text-align: center;">
+
+    <!-- Radar Animation -->
+    <div class="scan-radar" id="scan-radar-anim">
+      <div class="scan-radar-sweep" id="radar-sweep"></div>
+    </div>
+
+    <!-- Status Display -->
+    <div id="status-container">
+      <h2 style="font-size: 1.8rem; font-weight: 700; margin-bottom: 8px;" id="status-title">
+        {% if scan.status == 'completed' %}Scan Complete ✅
+        {% elif scan.status == 'failed' %}Scan Failed ❌
+        {% elif scan.status == 'running' %}Scanning...
+        {% else %}Preparing Scan...{% endif %}
+      </h2>
+
+      <p style="color: var(--text-secondary); margin-bottom: 8px; font-size: 0.95rem;" id="status-url">
+        Target: <span class="mono" style="color: var(--accent-blue);">{{ scan.target_url }}</span>
+      </p>
+
+      <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 30px;" id="status-message">
+        {% if scan.status == 'running' %}Running all security plugin checks...
+        {% elif scan.status == 'completed' %}All checks completed successfully.
+        {% elif scan.status == 'failed' %}{{ scan.error_message }}
+        {% else %}Initializing scan engine...{% endif %}
+      </p>
+    </div>
+
+    <!-- Progress Bar -->
+    <div class="scan-progress-bar" style="margin-bottom: 8px;">
+      <div class="scan-progress-fill" id="progress-fill"
+           style="width: {% if scan.status == 'completed' %}100%{% elif scan.status == 'failed' %}100%{% elif scan.status == 'running' %}60%{% else %}10%{% endif %};
+                  {% if scan.status == 'failed' %}background: linear-gradient(90deg, #FF2D55, #FF6B35);{% endif %}">
+      </div>
+    </div>
+    <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 32px;" id="progress-text">
+      {% if scan.status == 'completed' %}Analysis complete
+      {% elif scan.status == 'failed' %}Scan failed
+      {% else %}Running security checks...{% endif %}
+    </div>
+
+    <!-- Plugin checklist (visual) -->
+    <div id="plugin-checklist" style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 20px; text-align: left; margin-bottom: 24px;">
+      <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); margin-bottom: 14px;">Security Checks</div>
+      {% for check_icon, check_name in plugin_checks %}
+      <div class="plugin-check-item" style="display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.04);">
+        <span style="font-size: 1.1rem;">{{ check_icon }}</span>
+        <span style="font-size: 0.9rem; color: var(--text-secondary); flex: 1;">{{ check_name }}</span>
+        <span class="check-status" style="font-size: 0.8rem; color: var(--text-muted);">
+          {% if scan.status == 'completed' %}
+          <span style="color: var(--accent-green);">✓ Done</span>
+          {% elif scan.status == 'failed' %}
+          <span style="color: var(--accent-red);">✗ Error</span>
+          {% else %}
+          <span class="check-pending" style="color: var(--text-muted);">Pending</span>
+          {% endif %}
+        </span>
+      </div>
+      {% empty %}
+      {% for icon, name in default_checks %}
+      <div style="display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.04);">
+        <span style="font-size: 1.1rem;">{{ icon }}</span>
+        <span style="font-size: 0.9rem; color: var(--text-secondary); flex: 1;">{{ name }}</span>
+        <span style="font-size: 0.8rem;">
+          {% if scan.status == 'completed' %}<span style="color: var(--accent-green);">✓</span>
+          {% elif scan.status == 'failed' %}<span style="color: var(--accent-red);">✗</span>
+          {% else %}<span style="color: var(--text-muted);">⏳</span>{% endif %}
+        </span>
+      </div>
+      {% endfor %}
+      <!-- Default checks -->
+      {% for item in "🔒 Security Headers,🔐 SSL/TLS Analysis,🌐 DNS & IP,🚪 Port Scanner,🍪 Cookie Security,💉 XSS Detection,🗄️ SQL Injection,🎭 CSRF Analysis,🔍 Subdomains & Dirs,📡 Server Info"|split:"," %}
+      {% endfor %}
+      {% endfor %}
+    </div>
+
+    <!-- Action Buttons -->
+    <div id="action-buttons">
+      {% if scan.status == 'completed' %}
+      <a href="{% url 'scan_report' scan.id %}" class="btn btn-primary btn-lg" id="btn-view-report">
+        <i class="bi bi-file-earmark-bar-graph"></i> View Full Report
+      </a>
+      <a href="{% url 'new_scan' %}" class="btn btn-outline" id="btn-new-scan" style="margin-left: 12px;">
+        <i class="bi bi-plus"></i> New Scan
+      </a>
+      {% elif scan.status == 'failed' %}
+      <a href="{% url 'new_scan' %}" class="btn btn-primary btn-lg" id="btn-retry">
+        <i class="bi bi-arrow-clockwise"></i> Try Again
+      </a>
+      {% else %}
+      <div style="color: var(--text-muted); font-size: 0.85rem;">
+        <i class="bi bi-info-circle"></i>
+        This may take 30–90 seconds. Page auto-refreshes every 5 seconds.
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+{% block extra_js %}
+<script>
+var scanStatus = '{{ scan.status }}';
+var scanId = {{ scan.id }};
+var pollInterval = null;
+
+function pollStatus() {
+  fetch('/scan/' + scanId + '/status/api/')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var status = data.status;
+      var score = data.security_score;
+      var risk = data.risk_level;
+
+      if (status === 'completed') {
+        clearInterval(pollInterval);
+        document.getElementById('status-title').textContent = 'Scan Complete ✅';
+        document.getElementById('status-message').textContent = 'All security checks completed. Score: ' + score + '/100 | Risk: ' + risk;
+        document.getElementById('progress-fill').style.width = '100%';
+        document.getElementById('progress-text').textContent = 'Analysis complete';
+        document.getElementById('radar-sweep').style.animationPlayState = 'paused';
+        document.getElementById('action-buttons').innerHTML =
+          '<a href="/scan/' + scanId + '/report/" class="btn btn-primary btn-lg" id="btn-view-report">' +
+          '<i class="bi bi-file-earmark-bar-graph"></i> View Full Report</a>' +
+          ' <a href="/scan/new/" class="btn btn-outline" style="margin-left: 12px;" id="btn-new-scan">' +
+          '<i class="bi bi-plus"></i> New Scan</a>';
+        // Update check marks
+        document.querySelectorAll('.check-pending').forEach(function(el) {
+          el.innerHTML = '<span style="color: var(--accent-green);">✓ Done</span>';
+        });
+      } else if (status === 'failed') {
+        clearInterval(pollInterval);
+        document.getElementById('status-title').textContent = 'Scan Failed ❌';
+        document.getElementById('status-message').textContent = data.error_message || 'An error occurred.';
+        document.getElementById('progress-fill').style.background = 'linear-gradient(90deg, #FF2D55, #FF6B35)';
+        document.getElementById('progress-fill').style.width = '100%';
+        document.getElementById('action-buttons').innerHTML =
+          '<a href="/scan/new/" class="btn btn-primary btn-lg" id="btn-retry"><i class="bi bi-arrow-clockwise"></i> Try Again</a>';
+      } else if (status === 'running') {
+        // Simulate progress
+        var fill = document.getElementById('progress-fill');
+        var current = parseInt(fill.style.width) || 30;
+        if (current < 85) { fill.style.width = (current + 8) + '%'; }
+        document.getElementById('progress-text').textContent = 'Running security checks...';
+      }
+    })
+    .catch(function(e) { console.log('Poll error:', e); });
+}
+
+// Start polling if not completed
+if (scanStatus === 'pending' || scanStatus === 'running') {
+  pollInterval = setInterval(pollStatus, 5000);
+}
+</script>
+{% endblock %}
+{% endblock %}

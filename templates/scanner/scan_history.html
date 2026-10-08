@@ -1,0 +1,148 @@
+{% extends 'base.html' %}
+
+{% block title %}Scan History — Web Shield{% endblock %}
+
+{% block content %}
+<div class="page-layout" style="position: relative; z-index: 1;">
+  <aside class="sidebar">
+    <div class="sidebar-title">Navigation</div>
+    <a href="{% url 'dashboard' %}" class="sidebar-link" id="sidebar-dashboard"><span class="sidebar-icon">📊</span> Dashboard</a>
+    <a href="{% url 'new_scan' %}" class="sidebar-link" id="sidebar-new-scan"><span class="sidebar-icon">🔍</span> New Scan</a>
+    <a href="{% url 'scan_history' %}" class="sidebar-link active" id="sidebar-history"><span class="sidebar-icon">📋</span> Scan History</a>
+    {% if user.is_staff %}
+    <div class="sidebar-title">Administration</div>
+    <a href="{% url 'admin_panel' %}" class="sidebar-link" id="sidebar-admin"><span class="sidebar-icon">⚙️</span> Admin Panel</a>
+    {% endif %}
+  </aside>
+
+  <main class="main-content">
+    <div class="page-header" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
+      <div>
+        <h1>📋 Scan History</h1>
+        <p>All your previous vulnerability scans.</p>
+      </div>
+      <a href="{% url 'new_scan' %}" class="btn btn-primary" id="history-new-scan">
+        <i class="bi bi-plus"></i> New Scan
+      </a>
+    </div>
+
+    <!-- FILTERS -->
+    <div class="card" style="margin-bottom: 20px; padding: 16px 20px;">
+      <form method="get" style="display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap;" id="filter-form">
+        <div>
+          <label class="form-label" for="filter-url">Filter by URL</label>
+          <input type="text" name="url" id="filter-url" class="form-control" style="min-width: 280px;"
+                 placeholder="Search URL..." value="{{ url_filter }}">
+        </div>
+        <div>
+          <label class="form-label" for="filter-status">Status</label>
+          <select name="status" id="filter-status" class="form-control form-select" style="min-width: 150px;">
+            <option value="">All Status</option>
+            <option value="completed" {% if status_filter == 'completed' %}selected{% endif %}>Completed</option>
+            <option value="running" {% if status_filter == 'running' %}selected{% endif %}>Running</option>
+            <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Pending</option>
+            <option value="failed" {% if status_filter == 'failed' %}selected{% endif %}>Failed</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary btn-sm" id="filter-submit">
+          <i class="bi bi-funnel"></i> Filter
+        </button>
+        {% if status_filter or url_filter %}
+        <a href="{% url 'scan_history' %}" class="btn btn-outline btn-sm" id="filter-clear">Clear</a>
+        {% endif %}
+      </form>
+    </div>
+
+    <!-- SCANS TABLE -->
+    <div class="card">
+      <div class="card-body" style="padding: 0;">
+        {% if scans %}
+        <table class="table" id="history-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Target URL</th>
+              <th>Status</th>
+              <th>Score</th>
+              <th>Risk</th>
+              <th>Findings</th>
+              <th>Date</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for scan in scans %}
+            <tr id="scan-row-{{ scan.id }}">
+              <td class="mono" style="color: var(--text-muted); font-size: 0.8rem;">{{ scan.id }}</td>
+              <td>
+                <a href="{{ scan.target_url }}" target="_blank" rel="noopener"
+                   style="color: var(--accent-blue); text-decoration: none; font-size: 0.85rem; font-family: 'JetBrains Mono', monospace;"
+                   id="history-url-{{ scan.id }}">
+                  {{ scan.target_url|truncatechars:45 }}
+                </a>
+              </td>
+              <td>
+                <span class="status-dot {{ scan.status }}"></span>
+                <span style="font-size: 0.85rem; color: var(--text-secondary);">{{ scan.get_status_display }}</span>
+              </td>
+              <td>
+                {% if scan.security_score is not None %}
+                <span style="font-weight: 700;
+                  color: {% if scan.security_score >= 70 %}#30D158{% elif scan.security_score >= 40 %}#FFD60A{% else %}#FF2D55{% endif %};">
+                  {{ scan.security_score }}
+                </span>
+                {% else %}<span style="color: var(--text-muted);">—</span>{% endif %}
+              </td>
+              <td>
+                {% if scan.risk_level %}
+                <span class="risk-badge risk-{{ scan.risk_level }}">{{ scan.risk_level }}</span>
+                {% else %}<span style="color: var(--text-muted);">—</span>{% endif %}
+              </td>
+              <td>
+                <span style="font-size: 0.85rem; color: var(--text-muted);">
+                  {{ scan.findings.count }} findings
+                </span>
+              </td>
+              <td style="color: var(--text-muted); font-size: 0.8rem; white-space: nowrap;">
+                {{ scan.created_at|date:"M d, Y" }}<br>
+                <span style="font-size: 0.75rem;">{{ scan.created_at|date:"H:i" }}</span>
+              </td>
+              <td>
+                <div style="display: flex; gap: 6px;">
+                  {% if scan.status == 'completed' %}
+                  <a href="{% url 'scan_report' scan.id %}" class="btn btn-sm btn-outline" id="view-{{ scan.id }}"
+                     title="View Report"><i class="bi bi-file-earmark-text"></i></a>
+                  <a href="{% url 'download_report' scan.id %}" class="btn btn-sm btn-outline" id="dl-{{ scan.id }}"
+                     title="Download PDF"><i class="bi bi-file-pdf"></i></a>
+                  {% elif scan.status in 'pending,running' %}
+                  <a href="{% url 'scan_status' scan.id %}" class="btn btn-sm btn-outline" id="status-{{ scan.id }}"
+                     title="View Status"><i class="bi bi-hourglass-split"></i></a>
+                  {% endif %}
+                  <form method="post" action="{% url 'delete_scan' scan.id %}" style="margin: 0;"
+                        onsubmit="return confirm('Delete scan #{{ scan.id }}?')">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-sm btn-danger" id="delete-{{ scan.id }}" title="Delete">
+                      <i class="bi bi-trash3"></i>
+                    </button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state">
+          <div class="empty-state-icon">📋</div>
+          <h3>No Scans Found</h3>
+          <p>{% if status_filter or url_filter %}No scans match your filter criteria.{% else %}You haven't run any scans yet.{% endif %}</p>
+          <a href="{% url 'new_scan' %}" class="btn btn-primary" id="empty-new-scan">
+            <i class="bi bi-search"></i> Start Your First Scan
+          </a>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </main>
+</div>
+{% endblock %}
