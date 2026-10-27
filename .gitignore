@@ -1,1 +1,79 @@
-dbsqlite3
+# ====================================================================
+# Web Shield - .gitignore for Django Application & Deployment
+# ====================================================================
+
+# --- Python Bytecode & Cache ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# --- Database & Local State ---
+# SQLite database contains local passwords, scan results, and test data
+*.sqlite3
+*.sqlite3-journal
+db.sqlite3
+
+# --- Environment Variables & Sensitive Secrets ---
+# Never commit production secrets, API keys, or database credentials
+.env
+.env.*
+!.env.example
+local_settings.py
+
+# --- Virtual Environments ---
+venv/
+.venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# --- Django Static & Media Artifacts ---
+# Static assets collected via `python manage.py collectstatic`
+staticfiles/
+# User-uploaded files / reports
+media/
+
+# --- Logs & Runtime Temporary Files ---
+*.log
+logs/
+*.tmp
+*.bak
+
+# --- ML Artifacts (optional local training files) ---
+# scanner/ml_model.pkl
+# scanner/ml_scaler.pkl
+
+# --- Operating System Files ---
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# --- IDE & Editor Settings ---
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+*~

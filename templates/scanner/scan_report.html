@@ -19,7 +19,7 @@
     <a href="#findings" class="sidebar-link" id="sidebar-findings"><span class="sidebar-icon">⚠️</span> Findings</a>
     <a href="#by-plugin" class="sidebar-link" id="sidebar-plugin"><span class="sidebar-icon">🔌</span> By Plugin</a>
     <div style="padding: 12px;">
-      <a href="{% url 'download_report' scan.id %}" class="btn btn-success w-100" id="btn-download-pdf">
+      <a href="{% url 'download_report' scan.id %}" download class="btn btn-success w-100" id="btn-download-pdf">
         <i class="bi bi-file-pdf"></i> Download PDF
       </a>
     </div>
@@ -44,7 +44,7 @@
         </div>
       </div>
       <div style="display: flex; gap: 10px;">
-        <a href="{% url 'download_report' scan.id %}" class="btn btn-success" id="btn-pdf-top">
+        <a href="{% url 'download_report' scan.id %}" download class="btn btn-success" id="btn-pdf-top">
           <i class="bi bi-file-pdf"></i> PDF Report
         </a>
         <a href="{% url 'new_scan' %}" class="btn btn-outline" id="btn-new-scan-from-report">
@@ -236,6 +236,7 @@
     </div>
   </main>
 </div>
+{% endblock %}
 
 {% block extra_js %}
 <script>
@@ -302,5 +303,4 @@ function filterFindings(severity, btn) {
   });
 }
 </script>
-{% endblock %}
 {% endblock %}

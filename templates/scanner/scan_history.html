@@ -112,7 +112,7 @@
                   {% if scan.status == 'completed' %}
                   <a href="{% url 'scan_report' scan.id %}" class="btn btn-sm btn-outline" id="view-{{ scan.id }}"
                      title="View Report"><i class="bi bi-file-earmark-text"></i></a>
-                  <a href="{% url 'download_report' scan.id %}" class="btn btn-sm btn-outline" id="dl-{{ scan.id }}"
+                  <a href="{% url 'download_report' scan.id %}" download class="btn btn-sm btn-outline" id="dl-{{ scan.id }}"
                      title="Download PDF"><i class="bi bi-file-pdf"></i></a>
                   {% elif scan.status in 'pending,running' %}
                   <a href="{% url 'scan_status' scan.id %}" class="btn btn-sm btn-outline" id="status-{{ scan.id }}"

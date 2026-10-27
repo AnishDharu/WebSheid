@@ -218,10 +218,27 @@ def _run_scan_thread(scan_id):
             pass
 
 
+SECURITY_CHECKS = [
+    ('🔒', 'HTTP Security Headers'),
+    ('🔐', 'SSL/TLS Certificate & Cipher'),
+    ('🌐', 'DNS & IP Infrastructure'),
+    ('🚪', 'Open Port Scanning'),
+    ('🍪', 'Cookie Security Flags'),
+    ('💉', 'Cross-Site Scripting (XSS)'),
+    ('🗄️', 'SQL Injection Detection'),
+    ('🎭', 'CSRF Protection Analysis'),
+    ('🔍', 'Subdomain & Directory Discovery'),
+    ('📡', 'Server & Technology Information'),
+]
+
+
 @login_required
 def scan_status(request, scan_id):
     scan = get_object_or_404(ScanJob, id=scan_id, user=request.user)
-    return render(request, 'scanner/scan_status.html', {'scan': scan})
+    return render(request, 'scanner/scan_status.html', {
+        'scan': scan,
+        'security_checks': SECURITY_CHECKS,
+    })
 
 
 @login_required
@@ -300,11 +317,19 @@ def download_report(request, scan_id):
     except Exception:
         summary = {}
 
-    pdf_bytes = generate_pdf_report(scan, findings_list, summary)
+    try:
+        pdf_bytes = generate_pdf_report(scan, findings_list, summary)
+    except Exception as e:
+        messages.error(request, f'Unable to generate report: {e}')
+        return redirect('scan_report', scan_id=scan.id)
 
-    filename = f"webshield_report_{scan.id}_{scan.target_url.replace('https://', '').replace('http://', '').replace('/', '_')}.pdf"
+    import re
+    safe_target = re.sub(r'[^a-zA-Z0-9_\-\.]', '_', scan.target_url.replace('https://', '').replace('http://', ''))[:40]
+    filename = f"webshield_report_{scan.id}_{safe_target}.pdf"
+
     response = HttpResponse(pdf_bytes, content_type='application/pdf')
     response['Content-Disposition'] = f'attachment; filename="{filename}"'
+    response['Content-Length'] = len(pdf_bytes)
     return response
 
 

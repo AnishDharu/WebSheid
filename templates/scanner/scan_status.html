@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load scanner_tags %}
 
 {% block title %}Scan #{{ scan.id }} — Web Shield{% endblock %}
 
@@ -48,11 +49,11 @@
     <!-- Plugin checklist (visual) -->
     <div id="plugin-checklist" style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 20px; text-align: left; margin-bottom: 24px;">
       <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); margin-bottom: 14px;">Security Checks</div>
-      {% for check_icon, check_name in plugin_checks %}
+      {% for check_icon, check_name in security_checks %}
       <div class="plugin-check-item" style="display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.04);">
         <span style="font-size: 1.1rem;">{{ check_icon }}</span>
         <span style="font-size: 0.9rem; color: var(--text-secondary); flex: 1;">{{ check_name }}</span>
-        <span class="check-status" style="font-size: 0.8rem; color: var(--text-muted);">
+        <span class="check-status" style="font-size: 0.8rem;">
           {% if scan.status == 'completed' %}
           <span style="color: var(--accent-green);">✓ Done</span>
           {% elif scan.status == 'failed' %}
@@ -62,21 +63,6 @@
           {% endif %}
         </span>
       </div>
-      {% empty %}
-      {% for icon, name in default_checks %}
-      <div style="display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.04);">
-        <span style="font-size: 1.1rem;">{{ icon }}</span>
-        <span style="font-size: 0.9rem; color: var(--text-secondary); flex: 1;">{{ name }}</span>
-        <span style="font-size: 0.8rem;">
-          {% if scan.status == 'completed' %}<span style="color: var(--accent-green);">✓</span>
-          {% elif scan.status == 'failed' %}<span style="color: var(--accent-red);">✗</span>
-          {% else %}<span style="color: var(--text-muted);">⏳</span>{% endif %}
-        </span>
-      </div>
-      {% endfor %}
-      <!-- Default checks -->
-      {% for item in "🔒 Security Headers,🔐 SSL/TLS Analysis,🌐 DNS & IP,🚪 Port Scanner,🍪 Cookie Security,💉 XSS Detection,🗄️ SQL Injection,🎭 CSRF Analysis,🔍 Subdomains & Dirs,📡 Server Info"|split:"," %}
-      {% endfor %}
       {% endfor %}
     </div>
 
@@ -102,6 +88,7 @@
     </div>
   </div>
 </div>
+{% endblock %}
 
 {% block extra_js %}
 <script>
@@ -157,5 +144,4 @@ if (scanStatus === 'pending' || scanStatus === 'running') {
   pollInterval = setInterval(pollStatus, 5000);
 }
 </script>
-{% endblock %}
 {% endblock %}
